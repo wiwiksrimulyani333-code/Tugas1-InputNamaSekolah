@@ -1,0 +1,33 @@
+name: Compile CPP to EXE
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Memunculkan tombol untuk menjalankan manual di GitHub
+
+jobs:
+  build-windows:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Ambil kode dari repositori
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # 2. Install compiler MinGW untuk cross-compilation ke Windows
+    - name: Install MinGW Compiler
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mingw-w64
+
+    # 3. Kompilasi file .cpp menjadi .exe secara statis 
+    # (Statis memastikan file .exe membawa library-nya sendiri agar bisa dibuka di Windows manapun)
+    - name: Compile C++ to Windows EXE
+      run: x86_64-w64-mingw32-g++ -O3 main.cpp -o program_kamu.exe -static -static-libgcc -static-libstdc++
+
+    # 4. Upload file .exe sebagai Artifact agar bisa langsung diunduh
+    - name: Upload EXE Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Windows-Executable
+        path: program_kamu.exe
